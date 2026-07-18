@@ -1,8 +1,7 @@
-# TutorConnect — Member 1: Authentication & User Management
+# TutorConnect — Auth, User Management & Session Scheduling
 
-This module covers everything assigned to Member 1 of the TutorConnect project:
-JWT authentication, registration/login/logout, password reset, role-based
-authorization, and profile management for Students, Tutors, and Admins.
+This module covers everything assigned to Member 1 and Member 2 of the TutorConnect project:
+JWT authentication, profile management, tutor availability, session booking, double-booking prevention, and calendar history.
 
 ## Tech Stack
 - **Node.js + Express** — REST API
@@ -11,7 +10,7 @@ authorization, and profile management for Students, Tutors, and Admins.
 - **bcryptjs** — password hashing
 - **multer** — profile picture / document uploads
 - **nodemailer** — email verification & password reset emails (optional feature)
-
+- **swagger-ui-express / swagger-jsdoc** — auto-generated interactive API documentation
 ## Project Structure
 ```
 tutorconnect-auth/
@@ -31,6 +30,14 @@ tutorconnect-auth/
 │   │   ├── tutorController.js # public tutor discovery
 │   │   ├── tutorRoutes.js
 │   │   └── TutorProfile.js    # bio, subjects, qualifications, rate, docs
+│   ├── availability/
+│   │   ├── availabilityController.js # manage recurring schedules
+│   │   ├── availabilityRoutes.js
+│   │   └── Availability.js    # dayOfWeek, startTime, endTime
+│   ├── sessions/
+│   │   ├── sessionController.js # booking, rescheduling, cancel, history
+│   │   ├── sessionRoutes.js
+│   │   └── Session.js         # timestamps, status, notes
 │   ├── middleware/
 │   │   ├── auth.js            # protect (JWT check) + authorize (role check)
 │   │   └── upload.js          # multer config for images/documents
@@ -93,6 +100,24 @@ Server runs on `http://localhost:5000` by default.
 |---|---|---|---|
 | GET | `/tutors` | Public | List verified tutors. Query: `subject, minRate, maxRate, search, page, limit`. |
 | GET | `/tutors/:id` | Public | Get a single tutor's public profile. |
+
+### Availability (`/availability`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/availability` | Private (Tutor) | Add a recurring availability block. Body: `{ dayOfWeek, startTime, endTime }`. |
+| GET | `/availability/:tutorId` | Public | Get all availability slots for a specific tutor. |
+
+### Sessions (`/sessions`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/sessions/book` | Private (Student) | Book a tutoring session. Checks availability & overlap. Body: `{ tutorId, startTime, endTime, notes }`. |
+| PUT | `/sessions/:id/reschedule` | Private | Reschedule an existing session. Checks availability & overlap. Body: `{ startTime, endTime }`. |
+| DELETE | `/sessions/:id` | Private | Cancel a session (sets status to 'Cancelled'). |
+| GET | `/sessions/student/:id` | Private | Get all sessions for a specific student (Learning History). |
+| GET | `/sessions/tutor/:id` | Private | Get all sessions for a specific tutor. |
+
+## Interactive API Docs (Swagger)
+When the server is running, visit **`http://localhost:5000/api-docs`** to view and interact with the Swagger documentation for the Availability and Sessions modules.
 
 ## Authentication Flow
 1. `POST /auth/register` creates a `User` plus a matching `TutorProfile` or

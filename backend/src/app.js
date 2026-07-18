@@ -9,9 +9,37 @@ const connectDB = require('./config/db');
 const authRoutes = require('./auth/authRoutes');
 const userRoutes = require('./users/userRoutes');
 const tutorRoutes = require('./tutors/tutorRoutes');
+const availabilityRoutes = require('./availability/availabilityRoutes');
+const sessionRoutes = require('./sessions/sessionRoutes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Swagger Setup
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'TutorConnect API',
+      version: '1.0.0',
+      description: 'API for TutorConnect Application',
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+  },
+  apis: ['./src/**/*.js'], // look for swagger annotations in all src files
+};
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Connect to database
 connectDB();
@@ -47,6 +75,8 @@ app.use((req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/tutors', tutorRoutes);
+app.use('/availability', availabilityRoutes);
+app.use('/sessions', sessionRoutes);
 
 // 404 handler
 app.use((req, res) => {
