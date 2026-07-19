@@ -234,4 +234,14 @@ export const updateUserProfile = async (data: any) => {
   return response.data;
 };
 
+export const getTutorAvailability = async (tutorId: string) => {
+  const response = await api.get(`/availability/${tutorId}`);
+  return response.data;
+};
+
+export const addTutorAvailability = async (data: { dayOfWeek: string; startTime: string; endTime: string }) => {
+  const response = await api.post('/availability', data);
+  return response.data;
+};
+
 export default api;
