@@ -11,7 +11,7 @@ export interface User {
 
 export interface Tutor extends User {
   role: 'tutor';
-  userId: string; // The User._id, while id is TutorProfile._id
+  userId?: string;
   subjects: string[];
   hourlyRate: number;
   rating: number;

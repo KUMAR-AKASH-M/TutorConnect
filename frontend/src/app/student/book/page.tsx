@@ -80,7 +80,7 @@ function BookingForm() {
 
       // 1. Submit session booking
       const bookRes = await bookSession({
-        tutorId: tutor.id,
+        tutorId: tutor.userId || tutor.id,
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
         notes,

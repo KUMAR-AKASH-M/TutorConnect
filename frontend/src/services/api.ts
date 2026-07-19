@@ -6,11 +6,11 @@ const api = axios.create({
   withCredentials: true, // Send cookies
 });
 
-// Map backend TutorProfile + User to frontend Tutor
 const mapTutor = (profile: any): Tutor => {
   const user = profile.user || {};
   return {
-    id: user._id || profile._id || '',
+    id: profile._id || user._id || '',
+    userId: user._id || profile._id || '',
     name: user.name || 'Unknown Tutor',
     email: user.email || '',
     role: 'tutor',
