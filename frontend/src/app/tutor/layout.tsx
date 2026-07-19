@@ -1,3 +1,5 @@
+"use client";
+
 import { DashboardLayout } from '@/components/common/DashboardLayout';
 import { LayoutDashboard, Calendar, Users, Wallet, UserCircle } from 'lucide-react';
 

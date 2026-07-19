@@ -33,9 +33,13 @@ export const getSessions = async () => {
 
 export const getCurrentUser = async () => {
   await new Promise(resolve => setTimeout(resolve, 400));
-  // In a real app, this would get the user from a token
-  // For dummy purposes, we simulate getting the currently logged-in user
-  const role = (typeof window !== 'undefined' ? localStorage.getItem('tutorconnect_role') || 'student' : 'student') as Role;
+  if (typeof window === 'undefined') {
+    return { data: null };
+  }
+  const role = localStorage.getItem('tutorconnect_role') as Role | null;
+  if (!role) {
+    return { data: null };
+  }
   
   return { 
     data: { 
