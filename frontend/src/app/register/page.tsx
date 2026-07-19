@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { login } from '@/services/api';
+import { signup } from '@/services/api';
 import { BookOpen } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -19,20 +19,21 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'student' | 'tutor'>('student');
 
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
     try {
-      // For dummy purposes, login automatically after registration
-      // Append role hint to email to force the mock API to pick the right role
-      const mockEmail = `${role}@${email.split('@')[1] || 'example.com'}`;
-      await login({ email: mockEmail, password });
+      await signup({ name, email, password, role });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       
       router.push(`/${role}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err.response?.data?.message || 'Registration failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +54,11 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg mb-6 text-center font-medium border border-destructive/20 animate-pulse">
+              {error}
+            </div>
+          )}
           <div className="flex gap-4 mb-6">
             <Button
               type="button"
