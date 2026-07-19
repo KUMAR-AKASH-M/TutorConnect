@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getSessions } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, Video, FileText, ArrowRight } from 'lucide-react';
@@ -9,16 +10,19 @@ import Link from 'next/link';
 import { Session } from '@/types';
 
 export default function StudentDashboard() {
+  const { user } = useAuth();
+  
   const { data: response, isLoading } = useQuery({
-    queryKey: ['sessions'],
-    queryFn: getSessions,
+    queryKey: ['sessions', user?.role, user?.id],
+    queryFn: () => getSessions(user?.role || 'student', user?.id || ''),
+    enabled: !!user?.id,
   });
 
   const sessions: Session[] = response?.data || [];
   
   // Quick hack to distinguish upcoming vs past based on status for the mock UI
-  const upcomingSessions = sessions.filter(s => s.status === 'upcoming');
-  const pastSessions = sessions.filter(s => s.status === 'completed');
+  const upcomingSessions = sessions.filter(s => s.status === 'Pending' || s.status === 'Confirmed');
+  const pastSessions = sessions.filter(s => s.status === 'Completed');
 
   return (
     <div className="space-y-8">
@@ -85,7 +89,7 @@ export default function StudentDashboard() {
                         <Video className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">Session with {session.tutorId}</p>
+                        <p className="font-semibold text-foreground">Session with {session.tutorName || session.tutorId}</p>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {new Date(session.startTime).toLocaleString()}
                         </p>

@@ -1,3 +1,5 @@
+"use client";
+
 import { DashboardLayout } from '@/components/common/DashboardLayout';
 import { LayoutDashboard, CalendarDays, BookOpen, TrendingUp, Settings } from 'lucide-react';
 

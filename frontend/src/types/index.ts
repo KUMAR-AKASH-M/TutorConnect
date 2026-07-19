@@ -1,16 +1,17 @@
 export type Role = 'student' | 'tutor' | 'admin';
 
 export interface User {
-  id: string;
+  id: string; // Map from backend _id
   name: string;
   email: string;
   role: Role;
-  avatar?: string;
+  avatar?: string; // Map from backend profilePicture
   bio?: string;
 }
 
 export interface Tutor extends User {
   role: 'tutor';
+  userId: string; // The User._id, while id is TutorProfile._id
   subjects: string[];
   hourlyRate: number;
   rating: number;
@@ -29,6 +30,6 @@ export interface Session {
   date: string;
   startTime: string;
   endTime: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  price: number;
+  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
+  notes?: string;
 }

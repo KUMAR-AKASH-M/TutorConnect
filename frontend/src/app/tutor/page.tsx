@@ -2,18 +2,22 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getSessions } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, DollarSign, Calendar, Star } from 'lucide-react';
 
 export default function TutorDashboard() {
+  const { user } = useAuth();
+  
   const { data: response, isLoading } = useQuery({
-    queryKey: ['tutor-sessions'],
-    queryFn: getSessions,
+    queryKey: ['tutor-sessions', user?.role, user?.id],
+    queryFn: () => getSessions(user?.role || 'tutor', user?.id || ''),
+    enabled: !!user?.id,
   });
 
   const sessions = response?.data || [];
-  const upcomingSessions = sessions.filter(s => s.status === 'upcoming');
+  const upcomingSessions = sessions.filter((s: any) => s.status === 'Pending' || s.status === 'Confirmed');
 
   return (
     <div className="space-y-8">
@@ -80,7 +84,7 @@ export default function TutorDashboard() {
                         <Video className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">Session with {session.studentId}</p>
+                        <p className="font-semibold text-foreground">Session with {session.studentName || session.studentId}</p>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {new Date(session.startTime).toLocaleString()}
                         </p>

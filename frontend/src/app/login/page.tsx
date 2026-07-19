@@ -24,19 +24,16 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login({ email, password });
+      const response = await login({ email, password });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       
-      // Redirect based on simulated role
-      if (email.includes('admin')) {
-        router.push('/admin');
-      } else if (email.includes('tutor')) {
-        router.push('/tutor');
-      } else {
-        router.push('/student');
-      }
-    } catch {
-      setError('Invalid credentials');
+      const role = response.user?.role?.toLowerCase() || 'student';
+      if (role === 'admin') router.push('/admin');
+      else if (role === 'tutor') router.push('/tutor');
+      else router.push('/student');
+      
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
       setIsLoading(false);
     }

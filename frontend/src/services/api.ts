@@ -1,69 +1,100 @@
 import axios from 'axios';
-import { dummyTutors, dummySessions, currentUser } from '../utils/dummyData';
-import { Role } from '../types';
+import { Tutor, Session, User } from '../types';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  withCredentials: true,
 });
 
-// Mock interceptor to simulate API calls
-api.interceptors.request.use(async (config) => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return config;
-});
-
-// We can export mock functions directly since we don't have a real backend yet
 export const getTutors = async () => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return { data: dummyTutors };
+  const response = await api.get('/tutors');
+  const tutors = response.data.data.map((tp: any) => ({
+    id: tp._id,
+    userId: tp.user._id,
+    name: tp.user.name,
+    email: tp.user.email,
+    role: 'tutor',
+    avatar: tp.user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(tp.user.name)}`,
+    bio: tp.bio,
+    subjects: tp.subjects,
+    hourlyRate: tp.hourlyRate,
+    rating: tp.rating,
+    reviewsCount: tp.totalReviews,
+    experience: tp.experienceYears,
+    qualifications: tp.qualifications?.map((q: any) => q.title) || [],
+  }));
+  return { data: tutors };
 };
 
 export const getTutorById = async (id: string) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const tutor = dummyTutors.find(t => t.id === id);
-  if (!tutor) throw new Error('Tutor not found');
+  const response = await api.get(`/tutors/${id}`);
+  const tp = response.data.data;
+  const tutor = {
+    id: tp._id,
+    userId: tp.user._id,
+    name: tp.user.name,
+    email: tp.user.email,
+    role: 'tutor',
+    avatar: tp.user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(tp.user.name)}`,
+    bio: tp.bio,
+    subjects: tp.subjects,
+    hourlyRate: tp.hourlyRate,
+    rating: tp.rating,
+    reviewsCount: tp.totalReviews,
+    experience: tp.experienceYears,
+    qualifications: tp.qualifications?.map((q: any) => q.title) || [],
+  };
   return { data: tutor };
 };
 
-export const getSessions = async () => {
-  await new Promise(resolve => setTimeout(resolve, 600));
-  return { data: dummySessions };
+export const getSessions = async (role: string, userId: string) => {
+  const endpoint = role === 'tutor' ? `/sessions/tutor/${userId}` : `/sessions/student/${userId}`;
+  const response = await api.get(endpoint);
+  
+  const sessions = response.data.data.map((session: any) => ({
+    id: session._id,
+    tutorId: role === 'tutor' ? session.tutor : session.tutor._id,
+    studentId: role === 'student' ? session.student : session.student._id,
+    tutorName: role === 'tutor' ? undefined : session.tutor?.name,
+    studentName: role === 'student' ? undefined : session.student?.name,
+    date: new Date(session.startTime).toLocaleDateString(),
+    startTime: session.startTime,
+    endTime: session.endTime,
+    status: session.status,
+    notes: session.notes
+  }));
+  return { data: sessions };
 };
 
 export const getCurrentUser = async () => {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  // In a real app, this would get the user from a token
-  // For dummy purposes, we simulate getting the currently logged-in user
-  const role = (typeof window !== 'undefined' ? localStorage.getItem('tutorconnect_role') || 'student' : 'student') as Role;
+  const response = await api.get('/users/profile');
+  const user = response.data.data;
   
   return { 
     data: { 
-      ...currentUser, 
-      role,
-      name: role === 'tutor' ? 'Sarah Johnson' : role === 'admin' ? 'Admin User' : 'Alex Doe',
-      id: role === 'tutor' ? 't1' : role === 'admin' ? 'a1' : 'u1'
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role.toLowerCase(),
+      avatar: user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`,
+      bio: user.profile?.bio
     } 
   };
 };
 
 export const login = async (data: { email: string; password?: string }) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  // Mock login logic
-  if (data.email.includes('admin')) {
-    localStorage.setItem('tutorconnect_role', 'admin');
-  } else if (data.email.includes('tutor')) {
-    localStorage.setItem('tutorconnect_role', 'tutor');
-  } else {
-    localStorage.setItem('tutorconnect_role', 'student');
-  }
-  return { data: { token: 'mock-jwt-token' } };
+  const response = await api.post('/auth/login', data);
+  return response.data;
+};
+
+export const register = async (data: { name: string; email: string; password?: string; role: string }) => {
+  const response = await api.post('/auth/register', data);
+  return response.data;
 };
 
 export const logout = async () => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  localStorage.removeItem('tutorconnect_role');
-  return { data: { success: true } };
+  const response = await api.post('/auth/logout');
+  return response.data;
 };
 
 export default api;
