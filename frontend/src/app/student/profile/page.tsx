@@ -39,13 +39,7 @@ export default function StudentProfilePage() {
       setGradeLevel(user.profile?.gradeLevel || 'High School');
       setSubjectsOfInterest(user.profile?.subjectsOfInterest?.join(', ') || '');
       setLearningGoals(user.profile?.learningGoals || '');
-
-      // Handle backend relative upload paths
-      let avatarUrl = user.avatar || '';
-      if (avatarUrl && avatarUrl.startsWith('/uploads')) {
-        avatarUrl = `http://localhost:5000${avatarUrl}`;
-      }
-      setAvatar(avatarUrl);
+      setAvatar(user.avatar || '');
     }
   }, [user]);
 
@@ -91,11 +85,7 @@ export default function StudentProfilePage() {
     try {
       const res = await uploadProfilePicture(formData);
       if (res.success) {
-        let newAvatar = res.profilePicture;
-        if (newAvatar && newAvatar.startsWith('/uploads')) {
-          newAvatar = `http://localhost:5000${newAvatar}`;
-        }
-        setAvatar(newAvatar);
+        setAvatar(res.profilePicture);
         setSuccessMessage('Profile picture updated successfully!');
         queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       } else {

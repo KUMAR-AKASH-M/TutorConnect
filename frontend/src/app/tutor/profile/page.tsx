@@ -58,13 +58,7 @@ export default function TutorProfilePage() {
       setSubjects(user.profile?.subjects?.join(', ') || '');
       setRate(user.profile?.hourlyRate || 30);
       setExperience(user.profile?.experienceYears || 1);
-      
-      // Handle backend relative upload paths
-      let avatarUrl = user.avatar || '';
-      if (avatarUrl && avatarUrl.startsWith('/uploads')) {
-        avatarUrl = `http://localhost:5000${avatarUrl}`;
-      }
-      setAvatar(avatarUrl);
+      setAvatar(user.avatar || '');
     }
   }, [user]);
 
@@ -111,11 +105,7 @@ export default function TutorProfilePage() {
     try {
       const res = await uploadProfilePicture(formData);
       if (res.success) {
-        let newAvatar = res.profilePicture;
-        if (newAvatar && newAvatar.startsWith('/uploads')) {
-          newAvatar = `http://localhost:5000${newAvatar}`;
-        }
-        setAvatar(newAvatar);
+        setAvatar(res.profilePicture);
         setSuccessMessage('Profile picture updated successfully!');
         queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       } else {
