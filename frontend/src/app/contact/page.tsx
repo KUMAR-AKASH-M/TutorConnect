@@ -15,7 +15,7 @@ export default function ContactPage() {
     {
       name: "Kumar Akash",
       github: "https://github.com/KUMAR-AKASH-M",
-      linkedin: "https://www.linkedin.com/in/iwillupdate"
+      linkedin: "https://www.linkedin.com/in/kumar-akash01"
     },
     {
       name: "Gourob Karmakar",
