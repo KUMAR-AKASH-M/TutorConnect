@@ -8,7 +8,7 @@ exports.getAllTutors = async (req, res) => {
   try {
     const { subject, minRate, maxRate, search, page = 1, limit = 10 } = req.query;
 
-    const filter = { isVerified: true };
+    const filter = {};
     if (subject) filter.subjects = { $in: [subject] };
     if (minRate || maxRate) {
       filter.hourlyRate = {};
