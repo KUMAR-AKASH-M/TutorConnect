@@ -67,25 +67,23 @@ export const getSessions = async (role: string, userId: string) => {
 };
 
 export const getCurrentUser = async () => {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  if (typeof window === 'undefined') {
+  try {
+    const response = await api.get('/users/profile');
+    const user = response.data.data;
+    
+    return { 
+      data: { 
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role.toLowerCase(),
+        avatar: user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`,
+        bio: user.profile?.bio
+      } 
+    };
+  } catch (error) {
     return { data: null };
   }
-  const role = localStorage.getItem('tutorconnect_role') as Role | null;
-  if (!role) {
-    return { data: null };
-  }
-  
-  return { 
-    data: { 
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role.toLowerCase(),
-      avatar: user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`,
-      bio: user.profile?.bio
-    } 
-  };
 };
 
 export const login = async (data: { email: string; password?: string }) => {
