@@ -10,6 +10,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "TutorConnect | Find Your Perfect Tutor",
   description: "An online tutoring platform where students can discover tutors, book learning sessions, and track their learning progress.",
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

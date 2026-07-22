@@ -1,0 +1,66 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <circle cx="110" cy="110" r="100" fill="#07102A"/>
+
+  <!-- Graduation Cap -->
+  <path
+    d="M110 48L52 74L110 100L168 74L110 48Z"
+    fill="#FFFFFF"/>
+
+  <path
+    d="M74 86V116C74 132 91 145 110 145C129 145 146 132 146 116V86"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Tassel -->
+  <line
+    x1="168"
+    y1="74"
+    x2="168"
+    y2="104"
+    stroke="#FFFFFF"
+    stroke-width="4"
+    stroke-linecap="round"/>
+
+  <circle
+    cx="168"
+    cy="110"
+    r="5"
+    fill="#FFFFFF"/>
+
+  <!-- Connection -->
+  <circle cx="82" cy="162" r="7" fill="#FFFFFF"/>
+  <circle cx="110" cy="176" r="7" fill="#FFFFFF"/>
+  <circle cx="138" cy="162" r="7" fill="#FFFFFF"/>
+
+  <line
+    x1="82"
+    y1="162"
+    x2="110"
+    y2="176"
+    stroke="#FFFFFF"
+    stroke-width="3"/>
+
+  <line
+    x1="110"
+    y1="176"
+    x2="138"
+    y2="162"
+    stroke="#FFFFFF"
+    stroke-width="3"/>
+
+  <!-- TC -->
+  <text
+    x="110"
+    y="125"
+    text-anchor="middle"
+    font-family="Poppins, Arial, sans-serif"
+    font-size="28"
+    font-weight="700"
+    fill="#07102A">
+    TC
+  </text>
+</svg>
