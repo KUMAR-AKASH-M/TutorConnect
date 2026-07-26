@@ -98,7 +98,7 @@ export default function ContactPage() {
                   <label htmlFor="message" className="text-sm font-semibold text-slate-900">Your Message</label>
                   <textarea 
                     id="message" 
-                    className="flex min-h-[150px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 outline-none resize-y text-slate-900"
+                    className="flex min-h-37.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 outline-none resize-y text-slate-900"
                     placeholder="How can we help you?"
                     required
                   />

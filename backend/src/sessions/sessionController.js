@@ -47,18 +47,26 @@ exports.bookSession = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Cannot book sessions in the past' });
     }
 
-    // Check tutor's recurring availability for this day of week (using UTC to be timezone-agnostic)
+    const localStartTime = req.body.localStartTime;
+    const localEndTime = req.body.localEndTime;
+    const localDayOfWeek = req.body.localDayOfWeek;
+    
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayOfWeek = days[start.getUTCDay()];
+
+    // Use explicit local time components if provided by frontend (avoids timezone shift bugs), otherwise fallback to UTC
+    const dayOfWeek = localDayOfWeek || days[start.getUTCDay()];
     
-    // Convert session times to HH:MM strings in UTC
-    const startHour = String(start.getUTCHours()).padStart(2, '0');
-    const startMin = String(start.getUTCMinutes()).padStart(2, '0');
-    const endHour = String(end.getUTCHours()).padStart(2, '0');
-    const endMin = String(end.getUTCMinutes()).padStart(2, '0');
-    
-    const sessionStartStr = `${startHour}:${startMin}`;
-    const sessionEndStr = `${endHour}:${endMin}`;
+    let sessionStartStr = localStartTime;
+    let sessionEndStr = localEndTime;
+
+    if (!sessionStartStr || !sessionEndStr) {
+      const startHour = String(start.getUTCHours()).padStart(2, '0');
+      const startMin = String(start.getUTCMinutes()).padStart(2, '0');
+      const endHour = String(end.getUTCHours()).padStart(2, '0');
+      const endMin = String(end.getUTCMinutes()).padStart(2, '0');
+      sessionStartStr = `${startHour}:${startMin}`;
+      sessionEndStr = `${endHour}:${endMin}`;
+    }
 
     const isAvailable = await Availability.findOne({
       tutor: tutorId,

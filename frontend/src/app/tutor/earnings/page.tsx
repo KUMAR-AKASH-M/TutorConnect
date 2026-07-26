@@ -38,7 +38,7 @@ export default function TutorEarningsPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-6 rounded-3xl text-white shadow-lg shadow-emerald-500/20">
+        <div className="bg-linear-to-br from-emerald-500 to-teal-600 p-6 rounded-3xl text-white shadow-lg shadow-emerald-500/20">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-medium text-white/80">Total Revenue</p>
             <div className="bg-white/20 p-2 rounded-xl">

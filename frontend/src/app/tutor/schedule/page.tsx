@@ -31,8 +31,8 @@ export default function TutorSchedulePage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const upcomingSessions = sessions.filter(s => s.status === 'upcoming' || s.status === 'Confirmed' || s.status === 'Pending');
-  const pastSessions = sessions.filter(s => s.status === 'completed' || s.status === 'Completed');
+  const upcomingSessions = sessions.filter(s => s.status === 'Confirmed' || s.status === 'Pending');
+  const pastSessions = sessions.filter(s => s.status === 'Completed');
 
   const handleOpenProgress = (session: Session) => {
     setLoggingProgressSession(session);
@@ -120,7 +120,7 @@ export default function TutorSchedulePage() {
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-xl border-slate-200 h-10 text-slate-600 hover:bg-slate-50" onClick={() => handleOpenProgress(session)}>
                     Log Progress
                   </Button>
-                  <Link href={`/call/${session._id || session.id}`} className="flex-1 sm:flex-none">
+                  <Link href={`/call/${session.id}`} className="flex-1 sm:flex-none">
                     <Button size="sm" className="w-full h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
                       Start Lesson
                     </Button>
@@ -230,12 +230,12 @@ export default function TutorSchedulePage() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-900">Private Notes</label>
-                    <Textarea placeholder="Notes for grading or record keeping..." value={notes} onChange={(e) => setNotes(e.target.value)} className="rounded-xl border-slate-200 bg-slate-50 min-h-[80px]" />
+                    <Textarea placeholder="Notes for grading or record keeping..." value={notes} onChange={(e) => setNotes(e.target.value)} className="rounded-xl border-slate-200 bg-slate-50 min-h-20" />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-900">Feedback for Student</label>
-                    <Textarea placeholder="Encouraging feedback and homework tips..." value={feedback} onChange={(e) => setFeedback(e.target.value)} className="rounded-xl border-slate-200 bg-slate-50 min-h-[80px]" />
+                    <Textarea placeholder="Encouraging feedback and homework tips..." value={feedback} onChange={(e) => setFeedback(e.target.value)} className="rounded-xl border-slate-200 bg-slate-50 min-h-20" />
                   </div>
 
                   <div className="flex gap-3 pt-2">

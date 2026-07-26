@@ -115,7 +115,7 @@ export default function StudentProfilePage() {
       {/* Profile Card */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         {/* Avatar Section */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-8 flex flex-col items-center">
+        <div className="bg-linear-to-br from-blue-600 to-indigo-600 p-8 flex flex-col items-center">
           <div className="relative group cursor-pointer mb-4" onClick={triggerFileInput}>
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl bg-blue-100 flex items-center justify-center">
               {avatar ? (
@@ -203,7 +203,7 @@ export default function StudentProfilePage() {
                 value={learningGoals}
                 onChange={(e) => setLearningGoals(e.target.value)}
                 required
-                className="rounded-xl border-slate-200 bg-slate-50 min-h-[100px]"
+                className="rounded-xl border-slate-200 bg-slate-50 min-h-25"
               />
             </div>
 

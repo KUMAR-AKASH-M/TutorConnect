@@ -73,7 +73,7 @@ export default function TutorStudentsPage() {
           <p className="text-sm font-semibold text-slate-500">Total Lessons</p>
           <div className="text-3xl font-bold text-blue-600 mt-1">{sessions.length}</div>
         </div>
-        <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
+        <div className="col-span-2 sm:col-span-1 bg-linear-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
           <p className="text-sm font-medium text-white/80">Avg. Lessons / Student</p>
           <div className="text-3xl font-bold mt-1">{uniqueStudents.length > 0 ? (sessions.length / uniqueStudents.length).toFixed(1) : '0'}</div>
         </div>

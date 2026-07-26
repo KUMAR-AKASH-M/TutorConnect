@@ -50,7 +50,7 @@ export function DashboardLayout({ children, links }: DashboardLayoutProps) {
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden sticky top-24">
 
             {/* User Info */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-5 flex items-center gap-3">
+            <div className="bg-linear-to-br from-blue-600 to-indigo-600 p-5 flex items-center gap-3">
               {user?.avatar ? (
                 <img src={user.avatar} alt={user.name} className="w-11 h-11 rounded-full object-cover border-2 border-white/40 shrink-0" />
               ) : (

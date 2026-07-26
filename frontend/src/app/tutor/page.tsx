@@ -67,7 +67,7 @@ export default function TutorDashboard() {
           <div className="text-4xl font-bold text-slate-900">{totalStudents}</div>
           <p className="text-xs text-slate-400 mt-1">enrolled</p>
         </div>
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
+        <div className="bg-linear-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
           <p className="text-sm font-medium text-white/80 mb-2">Upcoming</p>
           <div className="text-4xl font-bold">{upcomingSessions.length}</div>
           <p className="text-xs text-white/60 mt-1">sessions</p>

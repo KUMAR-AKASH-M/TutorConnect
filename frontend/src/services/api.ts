@@ -32,12 +32,7 @@ const mapSession = (session: any): Session => {
   const tutorUser = session.tutor || {};
   const studentUser = session.student || {};
 
-  let status: 'upcoming' | 'completed' | 'cancelled' = 'upcoming';
-  if (session.status === 'Completed') {
-    status = 'completed';
-  } else if (session.status === 'Cancelled') {
-    status = 'cancelled';
-  }
+  const status = (session.status || 'Pending') as Session['status'];
 
   const d = new Date(session.startTime);
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -54,7 +49,6 @@ const mapSession = (session: any): Session => {
     startTime: session.startTime,
     endTime: session.endTime,
     status,
-    price: 40,
   };
 };
 
@@ -99,7 +93,8 @@ export const getCurrentUser = async () => {
           role: user.role.toLowerCase() as Role,
           avatar: user.profilePicture || 'https://i.pravatar.cc/150?img=11',
           bio: user.profile?.bio || '',
-        },
+          profile: user.profile || {},
+        } as User,
       };
     }
   } catch (error) {

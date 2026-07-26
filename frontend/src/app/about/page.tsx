@@ -47,7 +47,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden pb-16">
       {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-blue-100/60 via-slate-50 to-slate-50 -z-10" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-blue-100/60 via-slate-50 to-slate-50 -z-10" />
 
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden py-20 mb-10">
@@ -156,7 +156,7 @@ export default function AboutPage() {
         </section>
 
         {/* 8. Call to Action */}
-        <section className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-[2.5rem] p-10 md:p-16 text-center space-y-8 shadow-2xl relative overflow-hidden">
+        <section className="bg-linear-to-br from-blue-600 to-indigo-700 text-white rounded-[2.5rem] p-10 md:p-16 text-center space-y-8 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
           

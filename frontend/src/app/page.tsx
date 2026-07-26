@@ -263,7 +263,7 @@ export default function Home() {
       {/* Testimonial & CTA */}
       <section className="py-24 bg-white relative">
         <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl shadow-blue-900/20 border border-slate-700/50">
+          <div className="bg-linear-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl shadow-blue-900/20 border border-slate-700/50">
             {/* Glowing accents */}
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
@@ -283,7 +283,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-10 tracking-tight">
                 "TutorConnect has helped me improve my grades and confidence. My tutor is simply amazing!"
               </h2>
-              <div className="flex items-center gap-4 bg-white/5 inline-flex p-3 pr-8 rounded-full border border-white/10 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-4 bg-white/5 p-3 pr-8 rounded-full border border-white/10 backdrop-blur-sm">
                 <img src="/akash.jpg" alt="Kumar Akash" className="w-14 h-14 rounded-full border-2 border-blue-500 shadow-lg object-cover" />
                 <div>
                   <p className="font-bold text-white text-lg leading-none mb-1">Kumar Akash</p>

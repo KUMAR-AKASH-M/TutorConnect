@@ -55,7 +55,7 @@ export default function StudentDashboard() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
+        <div className="bg-linear-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl text-white shadow-lg shadow-blue-500/20">
           <p className="text-sm font-medium text-white/80 mb-2">Upcoming</p>
           <div className="text-4xl font-bold">{upcomingSessions.length}</div>
           <p className="text-xs text-white/60 mt-1">sessions</p>
