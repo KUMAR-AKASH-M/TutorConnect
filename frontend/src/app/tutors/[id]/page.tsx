@@ -86,7 +86,7 @@ export default function TutorProfilePage({ params }: { params: Promise<{ id: str
                   </div>
                   <div className="flex items-center gap-1.5">
                     <MapPin className="h-4 w-4 text-slate-400" />
-                    New York, USA
+                    India
                   </div>
                   <div className="flex items-center gap-1.5">
                     <GraduationCap className="h-4 w-4 text-slate-400" />

@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getPaymentHistory } from '@/services/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, DollarSign, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Wallet, IndianRupee, TrendingUp, ArrowUpRight, Receipt } from 'lucide-react';
 
 export default function TutorEarningsPage() {
   const { data: response, isLoading } = useQuery({
@@ -13,93 +13,118 @@ export default function TutorEarningsPage() {
 
   const payments = response?.data || [];
   const completedPayments = payments.filter((p: any) => p.status === 'Completed');
+  const pendingPayments = payments.filter((p: any) => p.status === 'Pending');
   const totalEarnings = completedPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+  const pendingEarnings = pendingPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-100 rounded-3xl animate-pulse" />)}
+        </div>
+        <div className="h-72 bg-slate-100 rounded-3xl animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Earnings & Transactions</h1>
-        <p className="text-muted-foreground">Monitor received student payments, invoices, and your total teaching revenue.</p>
+      {/* Header */}
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Earnings & Transactions</h1>
+        <p className="text-slate-500 mt-1">Monitor your received payments and total teaching revenue.</p>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {[1, 2].map(i => <div key={i} className="h-28 bg-muted/50 rounded-2xl animate-pulse" />)}
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-6 rounded-3xl text-white shadow-lg shadow-emerald-500/20">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium text-white/80">Total Revenue</p>
+            <div className="bg-white/20 p-2 rounded-xl">
+              <IndianRupee className="h-4 w-4 text-white" />
+            </div>
           </div>
-          <div className="h-64 bg-muted/50 rounded-2xl animate-pulse" />
+          <div className="text-4xl font-bold">₹{totalEarnings.toFixed(2)}</div>
+          <p className="text-xs text-white/70 mt-1.5 flex items-center gap-1">
+            <TrendingUp className="h-3.5 w-3.5" /> Cleared & withdrawable
+          </p>
         </div>
-      ) : (
-        <>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-none shadow-md bg-linear-to-br from-emerald-500 to-teal-600 text-white hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white/90">Total Revenue</CardTitle>
-                <div className="bg-white/20 p-2 rounded-lg"><DollarSign className="h-4 w-4 text-white" /></div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-4xl font-bold">₹{totalEarnings.toFixed(2)}</div>
-                <p className="text-xs text-white/80 mt-1.5">Cleared and withdrawable</p>
-              </CardContent>
-            </Card>
 
-            <Card className="border-none shadow-md bg-white dark:bg-black/50 hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Transactions Logged</CardTitle>
-                <div className="bg-muted p-2 rounded-lg text-primary"><Wallet className="h-4 w-4" /></div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-4xl font-bold text-foreground">{completedPayments.length}</div>
-                <p className="text-xs text-muted-foreground mt-1.5">Successful payment transfers</p>
-              </CardContent>
-            </Card>
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-slate-500">Completed</p>
+            <div className="bg-blue-50 p-2 rounded-xl text-blue-600">
+              <Wallet className="h-4 w-4" />
+            </div>
           </div>
+          <div className="text-4xl font-bold text-slate-900">{completedPayments.length}</div>
+          <p className="text-xs text-slate-400 mt-1.5">Successful transactions</p>
+        </div>
 
-          <Card className="border-none shadow-md bg-white dark:bg-black/50">
-            <CardHeader>
-              <CardTitle>Invoices & Receipts</CardTitle>
-              <CardDescription>A history of all student tuition payments processed on your account.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {completedPayments.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b text-sm font-medium text-muted-foreground">
-                        <th className="pb-3 pt-1">Transaction ID</th>
-                        <th className="pb-3 pt-1">Student</th>
-                        <th className="pb-3 pt-1">Date</th>
-                        <th className="pb-3 pt-1">Status</th>
-                        <th className="pb-3 pt-1 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y text-sm">
-                      {completedPayments.map((payment: any) => (
-                        <tr key={payment._id} className="hover:bg-muted/10 transition-colors">
-                          <td className="py-4 font-mono text-xs">{payment.transactionId}</td>
-                          <td className="py-4 font-medium">{payment.student?.name || 'Student'}</td>
-                          <td className="py-4 text-muted-foreground">{new Date(payment.createdAt).toLocaleDateString()}</td>
-                          <td className="py-4">
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                              Cleared
-                            </span>
-                          </td>
-                          <td className="py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">+₹{payment.amount.toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/10">
-                  <TrendingUp className="mx-auto h-8 w-8 mb-3 text-muted-foreground" />
-                  No payment transactions processed yet.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-slate-500">Pending</p>
+            <div className="bg-amber-50 p-2 rounded-xl text-amber-500">
+              <Receipt className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="text-4xl font-bold text-slate-900">₹{pendingEarnings.toFixed(2)}</div>
+          <p className="text-xs text-slate-400 mt-1.5">Awaiting processing</p>
+        </div>
+      </div>
+
+      {/* Transaction Table */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100">
+          <h2 className="text-lg font-bold text-slate-900">Invoices & Receipts</h2>
+          <p className="text-slate-500 text-sm mt-1">A history of all student tuition payments processed on your account.</p>
+        </div>
+
+        {completedPayments.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50">
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Transaction ID</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Student</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {completedPayments.map((payment: any) => (
+                  <tr key={payment._id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500">{payment.transactionId?.substring(0, 18)}...</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                          {(payment.student?.name || 'S').charAt(0)}
+                        </div>
+                        <span className="font-semibold text-slate-900 text-sm">{payment.student?.name || 'Student'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-slate-500 text-sm">{new Date(payment.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">Cleared</span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-bold text-emerald-600">
+                      +₹{payment.amount.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-16 text-slate-400">
+            <TrendingUp className="mx-auto h-10 w-10 mb-3 text-slate-300" />
+            <p className="font-semibold text-slate-500">No transactions yet</p>
+            <p className="text-sm mt-1">Your earnings will appear here once students complete payments.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
