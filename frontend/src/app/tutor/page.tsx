@@ -106,9 +106,11 @@ export default function TutorDashboard() {
                         </div>
                       </div>
                     </div>
-                    <Button className="w-full sm:w-auto bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl shadow-none">
-                      Join
-                    </Button>
+                    <Link href={`/call/${session._id}`}>
+                      <Button className="w-full sm:w-auto bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl shadow-none">
+                        Join
+                      </Button>
+                    </Link>
                   </div>
                 ))}
               </div>

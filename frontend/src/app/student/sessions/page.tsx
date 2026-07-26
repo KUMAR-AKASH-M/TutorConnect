@@ -137,7 +137,9 @@ export default function MySessionsPage() {
                   {activeTab === 'upcoming' && (
                     <div className="flex items-center gap-3 mt-4 md:mt-0">
                       <Button variant="outline" size="sm" className="w-full md:w-auto h-10 px-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">Cancel</Button>
-                      <Button size="sm" className="w-full md:w-auto h-10 px-4 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-none">Join Call</Button>
+                      <Link href={`/call/${session._id}`}>
+                        <Button size="sm" className="w-full md:w-auto h-10 px-4 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-none">Join Call</Button>
+                      </Link>
                     </div>
                   )}
                 </div>

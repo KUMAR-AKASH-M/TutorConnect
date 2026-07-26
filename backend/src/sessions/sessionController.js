@@ -287,3 +287,69 @@ exports.getTutorSessions = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * @swagger
+ * /sessions/{id}/meeting:
+ *   get:
+ *     summary: Get or create a video meeting URL for a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Meeting URL retrieved
+ */
+exports.getOrCreateMeeting = async (req, res, next) => {
+  try {
+    const session = await Session.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+
+    if (session.student.toString() !== req.user._id.toString() && session.tutor.toString() !== req.user._id.toString() && req.user.role !== 'Admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to access this meeting' });
+    }
+
+    if (session.meetingUrl) {
+      return res.status(200).json({ success: true, url: session.meetingUrl });
+    }
+
+    if (!process.env.DAILY_API_KEY) {
+      return res.status(500).json({ success: false, message: 'DAILY_API_KEY is not configured in backend environment.' });
+    }
+
+    // Call Daily API
+    const response = await fetch('https://api.daily.co/v1/rooms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.DAILY_API_KEY}`
+      },
+      body: JSON.stringify({
+        properties: {
+          exp: Math.floor(Date.now() / 1000) + 24 * 3600 // expires in 24h
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Daily.co API error: ${errorData.info || response.statusText}`);
+    }
+
+    const data = await response.json();
+    session.meetingUrl = data.url;
+    await session.save();
+
+    res.status(200).json({ success: true, url: session.meetingUrl });
+  } catch (error) {
+    next(error);
+  }
+};

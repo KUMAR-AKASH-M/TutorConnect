@@ -24,6 +24,9 @@ const sessionSchema = new mongoose.Schema({
     enum: ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
     default: 'Pending',
   },
+  meetingUrl: {
+    type: String,
+  },
   notes: {
     type: String,
   },
