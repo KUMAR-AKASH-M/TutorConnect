@@ -1,272 +1,151 @@
 "use client";
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSessions, cancelSession, submitReview } from '@/services/api';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Video, Calendar, Clock, Star, MessageSquare, AlertCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getSessions } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 import { Session } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Clock, Video, FileText, CalendarPlus } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-export default function StudentSessionsPage() {
-  const queryClient = useQueryClient();
+export default function MySessionsPage() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'cancelled'>('upcoming');
+
   const { data: response, isLoading } = useQuery({
-    queryKey: ['sessions'],
-    queryFn: getSessions,
+    queryKey: ['sessions', user?.role, user?.id],
+    queryFn: () => getSessions(user?.role || 'student', user?.id || ''),
+    enabled: !!user?.id,
   });
 
   const sessions: Session[] = response?.data || [];
 
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [reviewingSession, setReviewingSession] = useState<Session | null>(null);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState('');
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [reviewError, setReviewError] = useState('');
-  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const upcomingSessions = sessions.filter((s) => s.status === 'Pending' || s.status === 'Confirmed');
+  const pastSessions = sessions.filter((s) => s.status === 'Completed');
+  const cancelledSessions = sessions.filter((s) => s.status === 'Cancelled');
 
-  const upcomingSessions = sessions.filter(s => s.status === 'upcoming');
-  const pastSessions = sessions.filter(s => s.status === 'completed');
-
-  const handleCancel = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this tutoring session?')) return;
-
-    try {
-      await cancelSession(id);
-      queryClient.invalidateQueries({ queryKey: ['sessions'] });
-    } catch (err) {
-      console.error('Failed to cancel session:', err);
-    }
+  const getFilteredSessions = () => {
+    if (activeTab === 'upcoming') return upcomingSessions;
+    if (activeTab === 'past') return pastSessions;
+    return cancelledSessions;
   };
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reviewingSession) return;
-    
-    setIsSubmittingReview(true);
-    setReviewError('');
-    setReviewSuccess(false);
+  const filteredSessions = getFilteredSessions();
 
-    try {
-      const res = await submitReview({
-        tutorId: reviewingSession.tutorId,
-        sessionId: reviewingSession.id,
-        rating,
-        comment,
-      });
-
-      if (res.success) {
-        setReviewSuccess(true);
-        setTimeout(() => {
-          setReviewingSession(null);
-          setComment('');
-          setRating(5);
-          setReviewSuccess(false);
-        }, 2000);
-      } else {
-        setReviewError(res.message || 'Failed to submit review.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      setReviewError(err.response?.data?.message || 'You have already reviewed this session.');
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  };
+  if (isLoading) {
+    return <div className="p-8 text-center animate-pulse">Loading sessions...</div>;
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Sessions</h1>
-        <p className="text-muted-foreground">Manage your scheduled lessons and review tutor feedback.</p>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Sessions</h1>
+          <p className="text-slate-500 mt-1">Manage all your tutoring sessions.</p>
+        </div>
+        <Link href="/student/book">
+          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20">
+            <CalendarPlus className="h-4 w-4" />
+            Book New Session
+          </Button>
+        </Link>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b">
+      <div className="flex border-b border-slate-100 mb-6 px-2">
         <button
           onClick={() => setActiveTab('upcoming')}
-          className={`px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
-            activeTab === 'upcoming'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
+          className={cn(
+            "px-6 py-4 font-semibold text-sm transition-colors border-b-2",
+            activeTab === 'upcoming' ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+          )}
         >
-          Upcoming Sessions ({upcomingSessions.length})
+          Upcoming ({upcomingSessions.length})
         </button>
         <button
           onClick={() => setActiveTab('past')}
-          className={`px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
-            activeTab === 'past'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
+          className={cn(
+            "px-6 py-4 font-semibold text-sm transition-colors border-b-2",
+            activeTab === 'past' ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+          )}
         >
-          Past Lessons ({pastSessions.length})
+          Past ({pastSessions.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('cancelled')}
+          className={cn(
+            "px-6 py-4 font-semibold text-sm transition-colors border-b-2",
+            activeTab === 'cancelled' ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+          )}
+        >
+          Cancelled ({cancelledSessions.length})
         </button>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2].map(i => (
-            <Card key={i} className="animate-pulse h-28" />
-          ))}
-        </div>
+      {filteredSessions.length === 0 ? (
+        <Card className="border-0 shadow-sm bg-white rounded-3xl">
+          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+              <CalendarPlus className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-slate-900">No {activeTab} sessions</h3>
+            <p className="text-slate-500 max-w-sm mb-6">
+              You don&apos;t have any {activeTab} sessions right now. Book a new session to start learning!
+            </p>
+            <Link href="/tutors">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20">Find a Tutor</Button>
+            </Link>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-4">
-          {activeTab === 'upcoming' && (
-            <>
-              {upcomingSessions.length > 0 ? (
-                upcomingSessions.map(session => (
-                  <Card key={session.id} className="overflow-hidden border-border/50 bg-background/50 hover:bg-muted/10 transition-colors">
-                    <CardContent className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-primary/10 text-primary p-3 rounded-2xl">
-                          <Video className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">1-on-1 Lesson with {session.tutorName}</h3>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {session.date}</span>
-                            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {(() => {
-                               const d = new Date(session.startTime);
-                               const pad = (n: number) => String(n).padStart(2, '0');
-                               return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
-                             })()}</span>
-                            <span className="font-medium text-foreground">Topic: {session.subject}</span>
-                          </div>
-                        </div>
+        <div className="grid gap-4">
+          {filteredSessions.map((session) => (
+            <Card key={session.id} className="border border-slate-100 shadow-sm bg-white rounded-2xl hover:border-blue-100 hover:shadow-md transition-all">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row justify-between gap-6">
+                  <div className="flex gap-4">
+                    <img src={`https://ui-avatars.com/api/?name=${session.tutorName || 'Tutor'}&background=random`} alt="Tutor" className="w-12 h-12 rounded-full" />
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900">Session with {session.tutorName || 'Tutor'}</h3>
+                      <div className="flex items-center text-slate-500 mt-1 gap-2 text-sm font-semibold">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          {new Date(session.startTime).toLocaleDateString()} at{' '}
+                          {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
+                          {new Date(session.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <div className="flex gap-2 w-full md:w-auto">
-                        <Button variant="outline" onClick={() => handleCancel(session.id)} className="flex-1 md:flex-none text-destructive hover:bg-destructive/10">
-                          Cancel
-                        </Button>
-                        <Button className="flex-1 md:flex-none">
-                          Join Classroom
-                        </Button>
+                      <div className="mt-2 text-sm font-semibold">
+                        Status: <span className={cn(
+                          session.status === 'Confirmed' ? "text-emerald-600" :
+                          session.status === 'Pending' ? "text-amber-500" :
+                          session.status === 'Cancelled' ? "text-red-500" : "text-slate-500"
+                        )}>{session.status}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-16 border-2 border-dashed rounded-2xl bg-muted/10 text-muted-foreground">
-                  <AlertCircle className="mx-auto h-8 w-8 mb-3" />
-                  No upcoming tutoring sessions scheduled.
-                </div>
-              )}
-            </>
-          )}
-
-          {activeTab === 'past' && (
-            <>
-              {pastSessions.length > 0 ? (
-                pastSessions.map(session => (
-                  <Card key={session.id} className="overflow-hidden border-border/40 hover:bg-muted/5 transition-colors">
-                    <CardContent className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-3 rounded-2xl">
-                          <CheckCircleIcon />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">1-on-1 Lesson with {session.tutorName}</h3>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
-                            <span>Date: {session.date}</span>
-                            <span>Topic: {session.subject}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <Button variant="outline" className="gap-2 rounded-xl" onClick={() => setReviewingSession(session)}>
-                          <MessageSquare className="h-4 w-4" />
-                          Leave Review
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-16 border-2 border-dashed rounded-2xl bg-muted/10 text-muted-foreground">
-                  No completed lessons found.
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Review Modal Form overlay */}
-      {reviewingSession && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-2xl border-primary/20">
-            <CardHeader>
-              <CardTitle>Submit Review</CardTitle>
-              <CardDescription>Share your experience with tutor {reviewingSession.tutorName}.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {reviewSuccess ? (
-                <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-4 rounded-xl text-center font-medium border border-green-200">
-                  Review submitted successfully!
-                </div>
-              ) : (
-                <form onSubmit={handleReviewSubmit} className="space-y-4">
-                  {reviewError && (
-                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg border border-destructive/20 text-center font-medium">
-                      {reviewError}
+                    </div>
+                  </div>
+                  
+                  {session.notes && (
+                    <div className="md:w-1/3 bg-slate-50 p-4 rounded-xl text-sm flex items-start gap-2 border border-slate-100">
+                      <FileText className="h-4 w-4 shrink-0 text-slate-400 mt-0.5" />
+                      <p className="text-slate-600 font-medium leading-relaxed">{session.notes}</p>
                     </div>
                   )}
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Rating (1 to 5 Stars)</label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setRating(star)}
-                          className="text-amber-500 hover:scale-110 transition-transform"
-                        >
-                          <Star className={`h-8 w-8 ${star <= rating ? 'fill-current' : 'text-muted'}`} />
-                        </button>
-                      ))}
+                  
+                  {activeTab === 'upcoming' && (
+                    <div className="flex items-center gap-3 mt-4 md:mt-0">
+                      <Button variant="outline" size="sm" className="w-full md:w-auto h-10 px-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">Cancel</Button>
+                      <Button size="sm" className="w-full md:w-auto h-10 px-4 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-none">Join Call</Button>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="comment" className="text-sm font-medium">Write your comment</label>
-                    <Textarea
-                      id="comment"
-                      required
-                      placeholder="How did the lesson go? What was helpful?"
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      className="min-h-[100px] rounded-xl"
-                    />
-                  </div>
-
-                  <div className="flex gap-3 justify-end pt-2">
-                    <Button type="button" variant="ghost" onClick={() => setReviewingSession(null)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmittingReview}>
-                      {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
-                    </Button>
-                  </div>
-                </form>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>
-  );
-}
-
-// Small helper icon component
-function CheckCircleIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
   );
 }

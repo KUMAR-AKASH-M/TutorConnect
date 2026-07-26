@@ -1,194 +1,145 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import { getCurrentUser, getStudentProgress } from '@/services/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, BookOpen, Clock, Award, Star } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { getSessions } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
+import { Session } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Trophy, Clock, BookOpen, GraduationCap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
-export default function StudentProgressPage() {
-  // 1. Fetch current logged-in user
-  const { data: userResponse, isLoading: isUserLoading } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
+export default function ProgressPage() {
+  const { user } = useAuth();
+  
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['sessions', user?.role, user?.id],
+    queryFn: () => getSessions(user?.role || 'student', user?.id || ''),
+    enabled: !!user?.id,
   });
 
-  const studentId = userResponse?.data?.id;
-
-  // 2. Fetch progress logs for this student
-  const { data: progressResponse, isLoading: isProgressLoading } = useQuery({
-    queryKey: ['progress', studentId],
-    queryFn: () => getStudentProgress(studentId as string),
-    enabled: !!studentId,
+  const sessions: Session[] = response?.data || [];
+  
+  // Calculate metrics
+  const completedSessions = sessions.filter(s => s.status === 'Completed');
+  
+  let totalHours = 0;
+  completedSessions.forEach(session => {
+    const start = new Date(session.startTime).getTime();
+    const end = new Date(session.endTime).getTime();
+    totalHours += (end - start) / (1000 * 60 * 60);
   });
+  
+  const uniqueTutors = new Set(completedSessions.map(s => s.tutorId)).size;
 
-  const progressLogs = progressResponse?.data || [];
-
-  const isLoading = isUserLoading || isProgressLoading;
-
-  // Aggregate completion status
-  const subjectsMap: { [key: string]: { total: number; sum: number; count: number } } = {};
-  progressLogs.forEach((p: any) => {
-    const sub = p.subject || 'General';
-    if (!subjectsMap[sub]) {
-      subjectsMap[sub] = { total: 0, sum: 0, count: 0 };
-    }
-    subjectsMap[sub].sum += p.completionPercentage || 0;
-    subjectsMap[sub].count += 1;
-  });
-
-  const subjectsProgress = Object.keys(subjectsMap).map(sub => ({
-    name: sub,
-    percentage: Math.round(subjectsMap[sub].sum / subjectsMap[sub].count),
-    logsCount: subjectsMap[sub].count
-  }));
-
-  const totalLessons = progressLogs.length;
-  const completedLessons = progressLogs.filter((p: any) => p.status === 'Completed').length;
-  const overallAvgCompletion = totalLessons > 0
-    ? Math.round(progressLogs.reduce((sum: number, p: any) => sum + (p.completionPercentage || 0), 0) / totalLessons)
-    : 0;
+  if (isLoading) {
+    return <div className="p-8 text-center animate-pulse">Loading progress data...</div>;
+  }
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Learning Progress</h1>
-        <p className="text-muted-foreground">Monitor your course milestones, subjects studied, and tutor comments.</p>
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Learning Progress</h1>
+        <p className="text-slate-500 mt-1">Track your tutoring milestones and achievements.</p>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-3">
-            {[1, 2, 3].map(i => <div key={i} className="h-28 bg-muted/50 rounded-2xl animate-pulse" />)}
-          </div>
-          <div className="h-96 bg-muted/50 rounded-2xl animate-pulse" />
-        </div>
-      ) : progressLogs.length > 0 ? (
+      {completedSessions.length === 0 ? (
+        <Card className="border-0 shadow-sm bg-white rounded-3xl">
+          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+              <Trophy className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-slate-900">No completed sessions yet</h3>
+            <p className="text-slate-500 max-w-sm mb-6">
+              Your learning metrics will appear here once you complete your first tutoring session.
+            </p>
+            <Link href="/student/book">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20">Book a Session</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
         <>
-          {/* Quick Metrics */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <Card className="border-none shadow-md bg-white dark:bg-black/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Overall Completion</CardTitle>
-                <div className="bg-primary/15 p-2 rounded-lg text-primary"><Award className="h-4 w-4" /></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+                <CardTitle className="text-sm font-semibold text-slate-500">Total Hours</CardTitle>
+                <div className="bg-blue-50 p-2 rounded-xl text-blue-600">
+                  <Clock className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground mb-2">{overallAvgCompletion}%</div>
-                <Progress value={overallAvgCompletion} className="h-2" />
+              <CardContent className="p-0 pt-4">
+                <div className="text-4xl font-bold text-slate-900">{totalHours.toFixed(1)}</div>
               </CardContent>
             </Card>
-
-            <Card className="border-none shadow-md bg-white dark:bg-black/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Subjects Mastered</CardTitle>
-                <div className="bg-green-150/15 p-2 rounded-lg text-green-600"><BookOpen className="h-4 w-4" /></div>
+            <Card className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+                <CardTitle className="text-sm font-semibold text-slate-500">Completed Sessions</CardTitle>
+                <div className="bg-emerald-50 p-2 rounded-xl text-emerald-600">
+                  <BookOpen className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">{subjectsProgress.length}</div>
-                <p className="text-xs text-muted-foreground mt-1.5">Across science, math & humanities</p>
+              <CardContent className="p-0 pt-4">
+                <div className="text-4xl font-bold text-slate-900">{completedSessions.length}</div>
               </CardContent>
             </Card>
-
-            <Card className="border-none shadow-md bg-white dark:bg-black/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Completed Units</CardTitle>
-                <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-lg text-orange-600 dark:text-orange-400"><CheckCircle2 className="h-4 w-4" /></div>
+            <Card className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+                <CardTitle className="text-sm font-semibold text-slate-500">Unique Tutors</CardTitle>
+                <div className="bg-purple-50 p-2 rounded-xl text-purple-600">
+                  <GraduationCap className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">{completedLessons} / {totalLessons}</div>
-                <p className="text-xs text-muted-foreground mt-1.5">Confirmed by your tutors</p>
+              <CardContent className="p-0 pt-4">
+                <div className="text-4xl font-bold text-slate-900">{uniqueTutors}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+                <CardTitle className="text-sm font-semibold text-slate-500">Current Streak</CardTitle>
+                <div className="bg-amber-50 p-2 rounded-xl text-amber-500">
+                  <Trophy className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 pt-4">
+                <div className="text-4xl font-bold text-slate-900">1</div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {/* Subject breakdown list */}
-            <Card className="col-span-1 border-none shadow-md bg-white dark:bg-black/50">
-              <CardHeader>
-                <CardTitle className="text-lg">Subjects Overview</CardTitle>
-                <CardDescription>Average performance per subject</CardDescription>
+          <div className="grid gap-4 md:grid-cols-2 mt-8">
+            <Card className="col-span-1 bg-white rounded-3xl border border-slate-100 shadow-sm">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-bold text-slate-900">Recent Milestones</CardTitle>
+                <CardDescription className="text-slate-500">Your latest learning achievements</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {subjectsProgress.map((sub, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-semibold">{sub.name}</span>
-                      <span className="text-muted-foreground">{sub.percentage}%</span>
+              <CardContent className="p-8 pt-0">
+                <div className="space-y-6 mt-4">
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                      <BookOpen className="h-6 w-6" />
                     </div>
-                    <Progress value={sub.percentage} className="h-1.5" />
-                    <p className="text-xs text-muted-foreground">{sub.logsCount} session log(s) available</p>
+                    <div>
+                      <p className="font-bold text-slate-900">First Session Completed</p>
+                      <p className="text-sm text-slate-500">You took your first step towards mastery!</p>
+                    </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Logs Timeline */}
-            <Card className="col-span-2 border-none shadow-md bg-white dark:bg-black/50">
-              <CardHeader>
-                <CardTitle className="text-lg">Timeline Feedback & Updates</CardTitle>
-                <CardDescription>Detailed session progress reports compiled by your tutors.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6 relative border-l-2 pl-6 ml-3 border-border">
-                  {progressLogs.map((log: any) => (
-                    <div key={log._id} className="relative group">
-                      {/* Timeline dot */}
-                      <div className="absolute -left-[31px] bg-background border-2 border-primary p-1 rounded-full text-primary group-hover:scale-115 transition-transform">
-                        <CheckCircle2 className="h-3 w-3" />
+                  {totalHours >= 5 && (
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="h-12 w-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0">
+                        <Trophy className="h-6 w-6" />
                       </div>
-                      
-                      <div className="bg-muted/30 p-5 rounded-2xl border border-border/40 hover:bg-muted/50 transition-colors">
-                        <div className="flex justify-between items-start flex-wrap gap-2">
-                          <div>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
-                              {log.subject}
-                            </span>
-                            <h3 className="font-bold text-foreground text-base mt-2">
-                              Topics: {log.topicsCovered?.join(', ') || 'General Review'}
-                            </h3>
-                          </div>
-                          <span className="text-xs text-muted-foreground font-medium">
-                            {new Date(log.updatedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                        {log.notes && (
-                          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                            <strong>Tutor Notes:</strong> {log.notes}
-                          </p>
-                        )}
-
-                        {log.feedback && (
-                          <div className="mt-3 bg-card p-3 rounded-xl border border-border/60 text-sm italic text-foreground">
-                            <strong>Feedback:</strong> &ldquo;{log.feedback}&rdquo;
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-4 mt-4 text-xs font-medium text-muted-foreground">
-                          <span>Status: <strong className={log.status === 'Completed' ? 'text-green-600' : 'text-primary'}>{log.status}</strong></span>
-                          <span>•</span>
-                          <span>Completion: <strong>{log.completionPercentage}%</strong></span>
-                          <span>•</span>
-                          <span>Tutor: {log.tutor?.name || 'Tutor'}</span>
-                        </div>
+                      <div>
+                        <p className="font-bold text-slate-900">5 Hours of Learning</p>
+                        <p className="text-sm text-slate-500">Dedicated 5 hours to improving your skills.</p>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </>
-      ) : (
-        <Card className="text-center py-20 bg-muted/10 border-2 border-dashed">
-          <CardContent>
-            <Award className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-bold mb-2">No Progress Recorded Yet</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto">
-              Once you complete scheduled tutoring sessions, your tutors will compile progress reports and feedback here.
-            </p>
-          </CardContent>
-        </Card>
       )}
     </div>
   );

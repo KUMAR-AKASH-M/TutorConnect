@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { login } from '@/services/api';
-import { BookOpen } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function LoginPage() {
@@ -42,18 +42,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] px-4">
-      <Card className="w-full max-w-md shadow-lg border-border/50">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 text-primary p-3 rounded-full">
-              <BookOpen className="h-8 w-8" />
+    <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50 py-12 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-blue-100/40 via-slate-50 to-slate-50 -z-10" />
+      
+      <Card className="w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 rounded-3xl bg-white relative z-10">
+        <CardHeader className="space-y-3 text-center pt-10 pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="bg-blue-50 text-blue-600 p-4 rounded-2xl">
+              <GraduationCap className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-extrabold tracking-tight text-slate-900">Welcome back</CardTitle>
+          <CardDescription className="text-slate-500 text-base">
             Enter your email and password to access your account.
-            <br/><span className="text-xs mt-2 inline-block bg-muted p-2 rounded">Hint: use &quot;student@...&quot;, &quot;tutor@...&quot;, or &quot;admin@...&quot; to test roles.</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,7 +66,7 @@ export default function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-semibold text-slate-900">Email</label>
               <Input
                 id="email"
                 type="email"
@@ -72,13 +74,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11"
+                className="h-12 rounded-xl bg-slate-50 border-slate-200"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium">Password</label>
-                <Link href="#" className="text-xs text-primary hover:underline">
+                <label htmlFor="password" className="text-sm font-semibold text-slate-900">Password</label>
+                <Link href="#" className="text-sm font-semibold text-blue-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -88,18 +90,18 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11"
+                className="h-12 rounded-xl bg-slate-50 border-slate-200"
               />
             </div>
-            <Button type="submit" className="w-full h-11 text-base mt-2" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 mt-4" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center border-t p-6">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-slate-100 p-8">
+          <p className="text-slate-500 font-medium">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary font-medium hover:underline">
+            <Link href="/register" className="text-blue-600 font-bold hover:underline">
               Sign up
             </Link>
           </p>

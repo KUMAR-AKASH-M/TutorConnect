@@ -40,16 +40,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] px-4 py-12">
-      <Card className="w-full max-w-md shadow-lg border-border/50">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 text-primary p-3 rounded-full">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50 py-12 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-blue-100/40 via-slate-50 to-slate-50 -z-10" />
+
+      <Card className="w-full max-w-lg shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 rounded-3xl bg-white relative z-10">
+        <CardHeader className="space-y-3 text-center pt-10 pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="bg-blue-50 text-blue-600 p-4 rounded-2xl">
               <BookOpen className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-extrabold tracking-tight text-slate-900">Create an account</CardTitle>
+          <CardDescription className="text-slate-500 text-base">
             Join TutorConnect to start your learning journey.
           </CardDescription>
         </CardHeader>
@@ -59,19 +62,20 @@ export default function RegisterPage() {
               {error}
             </div>
           )}
+          
           <div className="flex gap-4 mb-6">
             <Button
               type="button"
-              variant={role === 'student' ? 'default' : 'outline'}
-              className="flex-1"
+              variant="outline"
+              className={`flex-1 h-12 rounded-xl font-semibold border-2 transition-all ${role === 'student' ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
               onClick={() => setRole('student')}
             >
               I am a Student
             </Button>
             <Button
               type="button"
-              variant={role === 'tutor' ? 'default' : 'outline'}
-              className="flex-1"
+              variant="outline"
+              className={`flex-1 h-12 rounded-xl font-semibold border-2 transition-all ${role === 'tutor' ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
               onClick={() => setRole('tutor')}
             >
               I am a Tutor
@@ -80,7 +84,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">Full Name</label>
+              <label htmlFor="name" className="text-sm font-semibold text-slate-900">Full Name</label>
               <Input
                 id="name"
                 type="text"
@@ -88,11 +92,11 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="h-11"
+                className="h-12 rounded-xl bg-slate-50 border-slate-200"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-semibold text-slate-900">Email</label>
               <Input
                 id="email"
                 type="email"
@@ -100,11 +104,11 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11"
+                className="h-12 rounded-xl bg-slate-50 border-slate-200"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Password</label>
+              <label htmlFor="password" className="text-sm font-semibold text-slate-900">Password</label>
               <Input
                 id="password"
                 type="password"
@@ -112,19 +116,19 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11"
+                className="h-12 rounded-xl bg-slate-50 border-slate-200"
                 minLength={8}
               />
             </div>
-            <Button type="submit" className="w-full h-11 text-base mt-2" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 mt-4" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign up'}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center border-t p-6">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-slate-100 p-8">
+          <p className="text-slate-500 font-medium">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary font-medium hover:underline">
+            <Link href="/login" className="text-blue-600 font-bold hover:underline">
               Sign in
             </Link>
           </p>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Menu, X, User as UserIcon, LogOut } from 'lucide-react';
+import { GraduationCap, Menu, X, User as UserIcon, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, logout } from '@/services/api';
@@ -38,14 +38,14 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-4 z-50 w-full mx-auto max-w-7xl px-4 transition-all duration-300">
-      <div className="flex h-16 items-center justify-between px-6 rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-black/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/40">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
+      <div className="container mx-auto max-w-7xl px-4 flex h-20 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-tr from-primary to-blue-400 text-white p-1.5 rounded-xl shadow-lg shadow-primary/30">
-              <BookOpen className="h-5 w-5" />
+            <div className="text-blue-600">
+              <GraduationCap className="h-7 w-7" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-primary">TutorConnect</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">TutorConnect</span>
           </Link>
         </div>
 
@@ -55,8 +55,8 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+              className={`text-sm font-semibold transition-all hover:text-blue-600 relative py-2 ${
+                pathname === link.href ? 'text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600 after:rounded-full' : 'text-slate-600'
               }`}
             >
               {link.label}
@@ -69,22 +69,23 @@ export function Navbar() {
           {user ? (
             <div className="flex items-center gap-4">
               <Link href={`/${user.role}`}>
-                <Button variant="ghost" className="gap-2">
+                <Button variant="ghost" className="gap-2 font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50">
                   <UserIcon className="h-4 w-4" />
                   Dashboard
                 </Button>
               </Link>
-              <Button variant="outline" size="icon" onClick={handleLogout} title="Logout">
+              <Button variant="outline" onClick={handleLogout} className="gap-2 font-bold text-slate-700 hover:text-red-600 hover:bg-red-50 hover:border-red-200 shadow-sm">
                 <LogOut className="h-4 w-4" />
+                Logout
               </Button>
             </div>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost">Log in</Button>
+                <Button variant="ghost" className="font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50 h-10 px-6 rounded-xl">Log in</Button>
               </Link>
               <Link href="/register">
-                <Button>Sign up</Button>
+                <Button className="font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-7 h-10 shadow-md shadow-blue-600/20">Sign up</Button>
               </Link>
             </>
           )}
@@ -92,7 +93,7 @@ export function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden p-2 text-foreground"
+          className="md:hidden p-2 text-slate-600 hover:text-slate-900"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -119,12 +120,12 @@ export function Navbar() {
             {user ? (
               <>
                 <Link href={`/${user.role}`} onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full justify-start gap-2">
+                  <Button variant="outline" className="w-full justify-start gap-2 font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50">
                     <UserIcon className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </Link>
-                <Button variant="ghost" className="w-full justify-start gap-2 text-destructive" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}>
+                <Button variant="outline" className="w-full justify-start gap-2 font-bold text-slate-700 hover:text-red-600 hover:bg-red-50 hover:border-red-200" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}>
                   <LogOut className="h-4 w-4" />
                   Logout
                 </Button>
