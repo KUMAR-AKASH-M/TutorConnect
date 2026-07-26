@@ -38,7 +38,7 @@ export default function TutorEarningsPage() {
                 <div className="bg-white/20 p-2 rounded-lg"><DollarSign className="h-4 w-4 text-white" /></div>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold">${totalEarnings.toFixed(2)}</div>
+                <div className="text-4xl font-bold">₹{totalEarnings.toFixed(2)}</div>
                 <p className="text-xs text-white/80 mt-1.5">Cleared and withdrawable</p>
               </CardContent>
             </Card>
@@ -84,7 +84,7 @@ export default function TutorEarningsPage() {
                               Cleared
                             </span>
                           </td>
-                          <td className="py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">+${payment.amount.toFixed(2)}</td>
+                          <td className="py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">+₹{payment.amount.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -4,8 +4,46 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Search, Star, CheckCircle2, PlayCircle, Users, BookOpen, Clock, Trophy } from 'lucide-react';
-import { dummyTutors } from '@/utils/dummyData';
 import { motion, Variants } from 'framer-motion';
+
+const featuredTutors = [
+  {
+    id: 't1',
+    name: 'Priya Sharma',
+    subject: 'Mathematics',
+    rating: 4.9,
+    reviewsCount: 142,
+    hourlyRate: 45,
+    avatar: '/tutors/indian_tutor_1_1785045831493.png'
+  },
+  {
+    id: 't2',
+    name: 'Rahul Patel',
+    subject: 'Computer Science',
+    rating: 5.0,
+    reviewsCount: 89,
+    hourlyRate: 60,
+    avatar: '/tutors/indian_tutor_2_1785045845331.png'
+  },
+  {
+    id: 't3',
+    name: 'Ananya Desai',
+    subject: 'English Literature',
+    rating: 4.8,
+    reviewsCount: 201,
+    hourlyRate: 35,
+    avatar: '/tutors/indian_tutor_3_1785045860150.png'
+  },
+  {
+    id: 't4',
+    name: 'Vikram Singh',
+    subject: 'Chemistry',
+    rating: 4.7,
+    reviewsCount: 156,
+    hourlyRate: 50,
+    avatar: '/tutors/indian_tutor_4_1785045872223.png'
+  }
+];
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -82,7 +120,7 @@ export default function Home() {
               <div className="relative w-full aspect-square max-w-lg mx-auto">
                 <div className="absolute inset-0 bg-blue-100 rounded-full scale-90 -z-10 translate-x-4 translate-y-4" />
                 <img 
-                  src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop" 
+                  src="/hero_student.png" 
                   alt="Student learning online" 
                   className="w-full h-full object-cover rounded-full shadow-2xl border-8 border-white"
                 />
@@ -90,7 +128,7 @@ export default function Home() {
                 {/* Floating Widget 1 */}
                 <div className="absolute top-12 -left-12 bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 flex items-center gap-4 animate-bounce hover:scale-105 transition-transform cursor-pointer" style={{ animationDuration: '3s' }}>
                   <div className="relative">
-                    <img src="https://randomuser.me/api/portraits/women/68.jpg" className="w-14 h-14 rounded-full object-cover border-2 border-blue-500 p-0.5" alt="Tutor" />
+                    <img src="/tutors/indian_tutor_1_1785045831493.png" className="w-14 h-14 rounded-full object-cover border-2 border-blue-500 p-0.5" alt="Tutor" />
                     <div className="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white" />
                   </div>
                   <div className="pr-4">
@@ -159,7 +197,7 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {dummyTutors.slice(0, 4).map((tutor) => (
+            {featuredTutors.map((tutor) => (
               <Card key={tutor.id} className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden cursor-pointer group">
                 <CardContent className="p-0">
                   <div className="bg-slate-100 h-32 relative flex justify-center">
@@ -171,7 +209,7 @@ export default function Home() {
                   </div>
                   <div className="pt-14 pb-6 px-6 text-center">
                     <h3 className="font-bold text-lg text-slate-900">{tutor.name}</h3>
-                    <p className="text-slate-500 text-sm mb-3">{tutor.subjects[0]} Tutor</p>
+                    <p className="text-slate-500 text-sm mb-3">{tutor.subject} Tutor</p>
                     
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
                       <div className="flex items-center gap-1 text-sm font-semibold text-slate-700">
@@ -246,7 +284,7 @@ export default function Home() {
                 "TutorConnect has helped me improve my grades and confidence. My tutor is simply amazing!"
               </h2>
               <div className="flex items-center gap-4 bg-white/5 inline-flex p-3 pr-8 rounded-full border border-white/10 backdrop-blur-sm">
-                <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Kumar Akash" className="w-14 h-14 rounded-full border-2 border-blue-500 shadow-lg object-cover" />
+                <img src="/akash.jpg" alt="Kumar Akash" className="w-14 h-14 rounded-full border-2 border-blue-500 shadow-lg object-cover" />
                 <div>
                   <p className="font-bold text-white text-lg leading-none mb-1">Kumar Akash</p>
                   <p className="text-blue-300 font-medium text-sm">High School Student</p>

@@ -95,7 +95,7 @@ function BookingForm() {
                 <option value="" disabled>Choose a tutor</option>
                 {tutors.map((tutor: any) => (
                   <option key={tutor.id} value={tutor.userId}>
-                    {tutor.name} - {tutor.subjects.join(', ')} (${tutor.hourlyRate}/hr)
+                    {tutor.name} - {tutor.subjects.join(', ')} (₹{tutor.hourlyRate}/hr)
                   </option>
                 ))}
               </select>

@@ -7,6 +7,7 @@ export interface User {
   role: Role;
   avatar?: string; // Map from backend profilePicture
   bio?: string;
+  profile?: any; // Nested profile data from backend
 }
 
 export interface Tutor extends User {
