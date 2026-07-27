@@ -6,18 +6,25 @@ const generateToken = (userId, role) => {
   });
 };
 
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = generateToken(user._id, user.role);
-
+const getTokenCookieOptions = () => {
   const cookieExpireDays = parseInt(process.env.COOKIE_EXPIRES_DAYS, 10) || 7;
-  const options = {
+  return {
     expires: new Date(Date.now() + cookieExpireDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
   };
+};
 
-  res.status(statusCode).cookie('token', token, options).json({
+const setTokenCookie = (res, token) => {
+  res.cookie('token', token, getTokenCookieOptions());
+};
+
+const sendTokenResponse = (user, statusCode, res) => {
+  const token = generateToken(user._id, user.role);
+  setTokenCookie(res, token);
+
+  res.status(statusCode).json({
     success: true,
     token,
     user: {
@@ -31,4 +38,4 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
-module.exports = { generateToken, sendTokenResponse };
+module.exports = { generateToken, sendTokenResponse, setTokenCookie };

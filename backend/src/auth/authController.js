@@ -2,8 +2,57 @@ const crypto = require('crypto');
 const User = require('../users/User');
 const TutorProfile = require('../tutors/TutorProfile');
 const StudentProfile = require('../users/StudentProfile');
-const { sendTokenResponse } = require('../utils/generateToken');
+const { generateToken, sendTokenResponse, setTokenCookie } = require('../utils/generateToken');
 const sendEmail = require('../utils/sendEmail');
+
+const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+
+const getClientUrl = () => process.env.CLIENT_URL || 'http://localhost:3000';
+
+const getGoogleRedirectUri = () =>
+  process.env.GOOGLE_REDIRECT_URI || `${getClientUrl().replace(/\/$/, '')}/api/auth/google/callback`;
+
+const getGoogleStateCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 10 * 60 * 1000,
+});
+
+const encodeState = (state) => Buffer.from(JSON.stringify(state)).toString('base64url');
+
+const decodeState = (state) => {
+  try {
+    return JSON.parse(Buffer.from(state, 'base64url').toString('utf8'));
+  } catch (error) {
+    return null;
+  }
+};
+
+const redirectWithGoogleError = (res, message) => {
+  const url = new URL('/auth/google/success', getClientUrl());
+  url.searchParams.set('error', message);
+  return res.redirect(url.toString());
+};
+
+const ensureProfileForUser = async (user, hourlyRate = 35) => {
+  if (user.role === 'Tutor') {
+    const existingProfile = await TutorProfile.findOne({ user: user._id });
+    if (!existingProfile) {
+      await TutorProfile.create({ user: user._id, hourlyRate });
+    }
+    return;
+  }
+
+  if (user.role === 'Student') {
+    const existingProfile = await StudentProfile.findOne({ user: user._id });
+    if (!existingProfile) {
+      await StudentProfile.create({ user: user._id });
+    }
+  }
+};
 
 // @desc    Register a new user (Student or Tutor)
 // @route   POST /auth/register
@@ -86,6 +135,119 @@ exports.login = async (req, res) => {
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Login failed.', error: error.message });
+  }
+};
+
+// @desc    Start Google OAuth login/signup
+// @route   GET /auth/google
+// @access  Public
+exports.googleAuth = async (req, res) => {
+  try {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return redirectWithGoogleError(res, 'Google sign-in is not configured.');
+    }
+
+    const requestedRole = String(req.query.role || '').toLowerCase();
+    const role = requestedRole === 'tutor' ? 'Tutor' : 'Student';
+    const state = {
+      nonce: crypto.randomBytes(16).toString('hex'),
+      role,
+    };
+    const encodedState = encodeState(state);
+
+    res.cookie('google_oauth_state', encodedState, getGoogleStateCookieOptions());
+
+    const authUrl = new URL(GOOGLE_AUTH_URL);
+    authUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID);
+    authUrl.searchParams.set('redirect_uri', getGoogleRedirectUri());
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', 'openid email profile');
+    authUrl.searchParams.set('state', encodedState);
+    authUrl.searchParams.set('prompt', 'select_account');
+
+    res.redirect(authUrl.toString());
+  } catch (error) {
+    redirectWithGoogleError(res, 'Could not start Google sign-in.');
+  }
+};
+
+// @desc    Complete Google OAuth login/signup
+// @route   GET /auth/google/callback
+// @access  Public
+exports.googleCallback = async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    const cookieState = req.cookies.google_oauth_state;
+
+    res.clearCookie('google_oauth_state');
+
+    if (!code || !state || !cookieState || state !== cookieState) {
+      return redirectWithGoogleError(res, 'Google sign-in could not be verified.');
+    }
+
+    const decodedState = decodeState(state);
+    const role = decodedState?.role === 'Tutor' ? 'Tutor' : 'Student';
+
+    const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: getGoogleRedirectUri(),
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      return redirectWithGoogleError(res, 'Google sign-in failed.');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const profileResponse = await fetch(GOOGLE_USERINFO_URL, {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+
+    if (!profileResponse.ok) {
+      return redirectWithGoogleError(res, 'Could not read your Google profile.');
+    }
+
+    const googleProfile = await profileResponse.json();
+    if (!googleProfile.email) {
+      return redirectWithGoogleError(res, 'Your Google account does not include an email address.');
+    }
+
+    let user = await User.findOne({ email: googleProfile.email.toLowerCase() });
+
+    if (user) {
+      user.googleId = user.googleId || googleProfile.sub;
+      user.authProvider = user.authProvider === 'local' ? 'local' : 'google';
+      user.isEmailVerified = true;
+      user.profilePicture = user.profilePicture || googleProfile.picture || '';
+      await user.save({ validateBeforeSave: false });
+    } else {
+      user = await User.create({
+        name: googleProfile.name || googleProfile.email.split('@')[0],
+        email: googleProfile.email,
+        role,
+        googleId: googleProfile.sub,
+        authProvider: 'google',
+        isEmailVerified: true,
+        profilePicture: googleProfile.picture || '',
+      });
+    }
+
+    await ensureProfileForUser(user);
+
+    const token = generateToken(user._id, user.role);
+    setTokenCookie(res, token);
+
+    const url = new URL('/auth/google/success', getClientUrl());
+    url.searchParams.set('role', user.role.toLowerCase());
+    res.redirect(url.toString());
+  } catch (error) {
+    redirectWithGoogleError(res, 'Google sign-in failed.');
   }
 };
 

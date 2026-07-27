@@ -106,6 +106,9 @@ JWT_SECRET=your_jwt_secret_key_here
 JWT_EXPIRES_IN=7d
 COOKIE_EXPIRES_DAYS=7
 CLIENT_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
 Start the backend development server:
 ```bash
@@ -138,6 +141,9 @@ NODE_ENV=production
 MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/TutorConnect
 JWT_SECRET=your_production_secret
 CLIENT_URL=https://your-frontend-project.vercel.app
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+GOOGLE_REDIRECT_URI=https://your-frontend-project.vercel.app/api/auth/google/callback
 ```
 
 ### 2. Vercel Dashboard (Frontend Service)

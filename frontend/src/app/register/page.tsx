@@ -31,9 +31,12 @@ export default function RegisterPage() {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       
       router.push(`/${role}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.message || 'Registration failed. Please check your credentials and try again.');
+      const message = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(message || 'Registration failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +125,20 @@ export default function RegisterPage() {
             </div>
             <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/20 mt-4" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign up'}
+            </Button>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+            <Button asChild type="button" variant="outline" className="w-full h-11 text-base">
+              <Link href={`/api/auth/google?role=${role}`}>
+                <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border text-xs font-semibold">G</span>
+                Continue with Google
+              </Link>
             </Button>
           </form>
         </CardContent>

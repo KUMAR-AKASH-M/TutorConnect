@@ -12,7 +12,12 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'https://tutorconnect-uzxw.onrender.com';
+    const defaultBackendUrl =
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5002'
+        : 'https://tutorconnect-uzxw.onrender.com';
+    const backendUrl = process.env.BACKEND_URL || defaultBackendUrl;
+
     return [
       {
         source: '/api/:path*',
